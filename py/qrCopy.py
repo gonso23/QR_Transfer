@@ -79,7 +79,7 @@ class QRCopyRder:
             
             # In jeden Parts einen Zähler einfügen i von n
             
-            print("Parts: ", len(parts), " * ", len(parts[0]) "bytes")
+            print("Parts: ", len(parts), " * ", len(parts[0]), "bytes")
             # Generate QR codes for each part and store in images array
             for part in parts:
                 qr = qrcode.QRCode(
