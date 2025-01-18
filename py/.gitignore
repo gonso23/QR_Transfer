@@ -1,0 +1,10 @@
+# Use * as a wildcard to match any number of characters
+# Use ? as a wildcard to match exactly one character
+# Ignore all directories and files named 'test ' test/
+# Ignore only the 'test' directory in the root directory /test/
+
+/test/
+*.log
+*.bak
+*.tmp
+
