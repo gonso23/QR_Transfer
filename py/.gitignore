@@ -3,7 +3,9 @@
 # Ignore all directories and files named 'test ' test/
 # Ignore only the 'test' directory in the root directory /test/
 
-/test/
+test/
+__pycache__/
+
 *.log
 *.bak
 *.tmp
