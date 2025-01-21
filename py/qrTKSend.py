@@ -3,7 +3,7 @@ from tkinter import filedialog
 from PIL import Image, ImageTk
 import zipfile
 import os
-import qrcode
+from QRTD import QSR, QRTD_type
 
 class QRCopyRder:
     def __init__(self, root):
@@ -18,16 +18,10 @@ class QRCopyRder:
         self.images = []
         self.current_image_index = 0
         
+        self.s = QSR()
+        
         # Create GUI components
         self.create_widgets()
-        self.part_size = 2331  # Adjust the size of each part transfered into a QRCode
-            #maximum capacities for error correction levels (in bytes)
-            #MAX_CAPACITIES = {
-            #"ERROR_CORRECT_L": 2953,
-            #"ERROR_CORRECT_M": 2331,
-            #"ERROR_CORRECT_Q": 1663,
-            #"ERROR_CORRECT_H": 1273
-            #}
         
     def create_widgets(self):
         # Picture area
@@ -74,51 +68,36 @@ class QRCopyRder:
             
             os.remove('temp.zip')
             
-            # Split the encoded data into parts
-            parts = [zip_data[i:i + self.part_size] for i in range(0, len(zip_data), self.part_size)]
+            self.s.send(QRTD_type.ZIP_BINARY,zip_data)
             
-            # In jeden Parts einen Zähler einfügen i von n
-            
-            print("Parts: ", len(parts), " * ", len(parts[0]), "bytes")
-            # Generate QR codes for each part and store in images array
-            for part in parts:
-                qr = qrcode.QRCode(
-                    version=None,
-                    error_correction=qrcode.constants.ERROR_CORRECT_M,
-                    box_size=1,  # Increase this value
-                    border=1,
-                )
-                #qr.add_data(part.decode('utf-8'))
-                qr.add_data(part)
-                qr.make(fit=True)
-                img = qr.make_image(fill='black', back_color='white')
-                
+            for img in self.s.images:    
                 # Resize image to fit screen
                 img = img.resize((self.screen_width, self.screen_height), Image.LANCZOS)
                 self.images.append(ImageTk.PhotoImage(img))
             
             # Display the first image
-            if self.images:
+            if len(self.images) > 0:
                 self.current_image_index = 0
                 self.update_image()
                 
     def show_prev_image(self):
-        if self.images and self.current_image_index > 0:
+        if len(self.images) > 0 and self.current_image_index > 0:
             self.current_image_index -= 1
             self.update_image()
             
     def show_next_image(self):
-        if self.images and self.current_image_index < len(self.images) - 1:
+        if len(self.images) > 0 and self.current_image_index < len(self.images) - 1:
             self.current_image_index += 1
             self.update_image()
             
     def clear_images(self):
+        self.s = QSR()
         self.images = []
         self.current_image_index = 0
         self.update_image()
         
     def update_image(self):
-        if self.images:
+        if len(self.images) > 0:
             self.picture_area.config(image=self.images[self.current_image_index], text="")
             self.image_info.config(text=f"{self.current_image_index + 1} / {len(self.images)}")
         else:

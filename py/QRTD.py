@@ -78,17 +78,25 @@ class QSR:
         self.hParts =[]
         
         self.data = []
-        self.type = QRTD_type.INIT  # Version or Datatype information internally set
+        self.qtype = QRTD_type.INIT  # Version or Datatype information internally set
         self.hash = bytearray(32)  # hash to all the data
 
         self.id = 0
         self._pSize = max_frame_length(MAX_CAPACITIES["Quartile"])  # size to slice the data into chunks to fit into QR code standards
         self.images = []
 
+    def send(self, qtype, input_data):
+        
+        self.set_hData(2, input_data)
+        self.hData_to_Parts()
+        self.Parts_to_hParts()
+        self.hParts_to_Imgs()
+        #self.s.save_Imgs_to_directory("./test")
+    
 
-    def set_hData(self, type, data): #entry for encoding
-        if self.type == QRTD_type.INIT and type != QRTD_type.INIT:
-            self.type = type
+    def set_hData(self, qtype, data): #entry for encoding
+        if self.qtype == QRTD_type.INIT and qtype != QRTD_type.INIT:
+            self.qtype = qtype
         else:
             raise ValueError("Unsupported type")
         
@@ -107,7 +115,7 @@ class QSR:
         padded_data = data + b'\x00' * padding_length
 
         # Format of hdata: 4 byte type - 4 byte padding length - 32 byte sha256 - n byte data + padding
-        self.hData = self.type.to_bytes(4, self.NC) + padding_length.to_bytes(4, self.NC) + byteA2NetworkByteArray(self.hash) + byteA2NetworkByteArray(padded_data)
+        self.hData = self.qtype.to_bytes(4, self.NC) + padding_length.to_bytes(4, self.NC) + byteA2NetworkByteArray(self.hash) + byteA2NetworkByteArray(padded_data)
         #print("setHData hdata: ", self.hData)   
 
     def getData(self): #entry for decoding after receive finished.
@@ -118,8 +126,8 @@ class QSR:
         
         self.hData  = b''.join(self.Parts)
 
-        type = int.from_bytes(self.hData[0:4], self.NC)
-        #print("getData   type: ", type)
+        qtype = int.from_bytes(self.hData[0:4], self.NC)
+        #print("getData   qtype: ", qtype)
 
         padding_length = int.from_bytes(self.hData[4:8], self.NC)
         #print("getData len pad: ", padding_length)
